@@ -45,6 +45,34 @@ func TestSupervisorOpensBreakerAtThreshold(t *testing.T) {
 	}
 }
 
+func TestSupervisorResetsBreaker_WhenWindowElapsesBetweenFailures(t *testing.T) {
+	s := NewSupervisor()
+	base := time.Unix(2000, 0)
+
+	// Trip the breaker (5 failures within window).
+	for i := 0; i < 5; i++ {
+		s.MarkFailed(base.Add(time.Duration(i) * time.Second))
+	}
+	if !s.Status().BreakerOpen {
+		t.Fatal("expected breaker to be open after threshold")
+	}
+
+	// A failure arrives well after the window — rolling window resets.
+	postWindow := base.Add(15 * time.Minute)
+	s.MarkFailed(postWindow)
+
+	status := s.Status()
+	if status.BreakerOpen {
+		t.Fatal("expected breaker to be reset after window elapsed")
+	}
+	if status.FailureCount != 1 {
+		t.Fatalf("expected failure count 1 (fresh burst), got %d", status.FailureCount)
+	}
+	if !s.CanRestart(postWindow) {
+		t.Fatal("expected restart to be allowed after breaker reset")
+	}
+}
+
 func TestSupervisorBackoffCapsAtMax(t *testing.T) {
 	s := NewSupervisor()
 	base := time.Unix(3000, 0)

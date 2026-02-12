@@ -56,6 +56,8 @@ func (s *Supervisor) MarkFailed(now time.Time) {
 
 	if !s.lastFailure.IsZero() && now.Sub(s.lastFailure) > s.window {
 		s.failureCount = 0
+		s.breakerOpen = false
+		s.breakerOpened = time.Time{}
 	}
 
 	s.failureCount++
