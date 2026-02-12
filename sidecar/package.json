@@ -1,0 +1,16 @@
+{
+  "name": "forgemate-sidecar",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ForgeMate agent runtime sidecar (gRPC skeleton)",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "smoke": "node scripts/smoke-run.mjs",
+    "smoke:e2e": "node scripts/smoke-e2e.mjs"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.0",
+    "@grpc/proto-loader": "^0.8.0"
+  }
+}

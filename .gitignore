@@ -1,0 +1,5 @@
+# Node sidecar dependencies
+sidecar/node_modules/
+
+# Runtime state
+.forgemate/
