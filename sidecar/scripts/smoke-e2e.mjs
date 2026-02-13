@@ -68,7 +68,7 @@ function runSmokeClient(cwd) {
 
 function shutdownServer(proc) {
   return new Promise((resolve) => {
-    if (proc.killed) {
+    if (proc.killed || proc.exitCode !== null) {
       resolve();
       return;
     }

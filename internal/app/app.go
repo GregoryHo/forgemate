@@ -19,6 +19,9 @@ import (
 
 // RunGateway starts the Go control-plane skeleton and handles graceful shutdown.
 func RunGateway(ctx context.Context, cfg config.Config) error {
+	if err := state.ValidateAgentID(cfg.AgentID); err != nil {
+		return fmt.Errorf("invalid agent ID: %w", err)
+	}
 	layout := state.ResolveLayout(cfg.StateDir, cfg.AgentID)
 	if err := state.EnsureLayout(layout); err != nil {
 		return fmt.Errorf("ensure state layout: %w", err)

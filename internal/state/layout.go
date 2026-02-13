@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Layout captures canonical state paths for one ForgeMate agent.
@@ -19,7 +20,19 @@ type Layout struct {
 	RunDir           string
 }
 
+// ValidateAgentID rejects agent IDs that could escape the state directory.
+func ValidateAgentID(agentID string) error {
+	if agentID == "" {
+		return fmt.Errorf("agent ID must not be empty")
+	}
+	if strings.ContainsAny(agentID, "/\\") || agentID == "." || agentID == ".." || strings.Contains(agentID, "..") {
+		return fmt.Errorf("agent ID %q contains invalid path characters", agentID)
+	}
+	return nil
+}
+
 // ResolveLayout returns deterministic file-backed state paths.
+// The caller must validate agentID with ValidateAgentID first.
 func ResolveLayout(rootDir string, agentID string) Layout {
 	agentDir := filepath.Join(rootDir, "agents", agentID)
 	return Layout{
