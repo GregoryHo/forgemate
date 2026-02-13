@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package forgemate.runtime.v1;
+
+option go_package = "forgemate/proto/runtime/v1;runtimev1";
+
+service AgentRuntime {
+  rpc Health(HealthRequest) returns (HealthResponse);
+  rpc Run(stream RunFrame) returns (stream RunFrame);
+  rpc Abort(AbortRequest) returns (AbortResponse);
+  rpc Wait(WaitRequest) returns (WaitResponse);
+  rpc AuthProbe(AuthProbeRequest) returns (AuthProbeResponse);
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  bool ok = 1;
+  string state = 2;
+  string runtime = 3;
+}
+
+message AbortRequest {
+  string run_id = 1;
+  string reason = 2;
+}
+
+message AbortResponse {
+  bool accepted = 1;
+  string state = 2;
+}
+
+message WaitRequest {
+  string run_id = 1;
+  uint32 timeout_ms = 2;
+}
+
+message WaitResponse {
+  string run_id = 1;
+  string terminal_state = 2;
+}
+
+message AuthProbeRequest {
+  string provider = 1;
+}
+
+message AuthProbeResponse {
+  string provider = 1;
+  bool reachable = 2;
+  string notes = 3;
+}
+
+message RunStart {
+  string run_id = 1;
+  string session_key = 2;
+  string prompt = 3;
+}
+
+message ToolResult {
+  string run_id = 1;
+  string tool_call_id = 2;
+  string output_json = 3;
+}
+
+message AbortSignal {
+  string run_id = 1;
+  string reason = 2;
+}
+
+message Ping {
+  int64 unix_ms = 1;
+}
+
+message RunAccepted {
+  string run_id = 1;
+  string sidecar_run_id = 2;
+}
+
+message AssistantDelta {
+  string run_id = 1;
+  string text = 2;
+}
+
+message ToolCallRequest {
+  string run_id = 1;
+  string call_id = 2;
+  string tool_name = 3;
+  string arguments_json = 4;
+}
+
+message ToolProgress {
+  string run_id = 1;
+  string call_id = 2;
+  string status = 3;
+}
+
+message RunCompleted {
+  string run_id = 1;
+  string output_text = 2;
+}
+
+message RunFailed {
+  string run_id = 1;
+  string code = 2;
+  string message = 3;
+}
+
+message Pong {
+  int64 unix_ms = 1;
+}
+
+message RunFrame {
+  uint64 seq = 1;
+  oneof frame {
+    RunStart run_start = 10;
+    ToolResult tool_result = 11;
+    AbortSignal abort_signal = 12;
+    Ping ping = 13;
+
+    RunAccepted run_accepted = 20;
+    AssistantDelta assistant_delta = 21;
+    ToolCallRequest tool_call_request = 22;
+    ToolProgress tool_progress = 23;
+    RunCompleted run_completed = 24;
+    RunFailed run_failed = 25;
+    Pong pong = 26;
+  }
+}
